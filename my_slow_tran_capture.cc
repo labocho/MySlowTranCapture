@@ -455,12 +455,7 @@ int process_ip(pcap_t *dev, const struct ip *ip, struct timeval tv,
   bool incoming;
   unsigned len;
 
-  if (is_local_address(ip->ip_src))
-    incoming= 0;
-  else if (is_local_address(ip->ip_dst))
-    incoming= 1;
-  else
-    return 1;
+  if (!is_local_address(ip->ip_src) && !is_local_address(ip->ip_dst)) return 1;
 
   len= htons(ip->ip_len);
   switch (ip->ip_p)
@@ -475,6 +470,13 @@ int process_ip(pcap_t *dev, const struct ip *ip, struct timeval tv,
     sport= ntohs(tcp->th_sport);
     dport= ntohs(tcp->th_dport);
     datalen= len - sizeof(struct ip) - tcp->th_off * 4;
+
+    if (dport == 3306)
+      incoming = 1;
+    else if (sport == 3306)
+      incoming = 0;
+    else
+      return 1;
 
     if (tcp->th_flags & TH_FIN)
     {
