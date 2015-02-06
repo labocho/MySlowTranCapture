@@ -6,7 +6,7 @@ OBJS= local_addresses.o my_slow_tran_capture.o
 DEST= /usr/local/bin
 CXX= g++
 CXXFLAGS= -Wall -O3
-LFLAGS= -Wall -O3 
+LFLAGS= -Wall -O3
 LIBS= -lpcap -lboost_regex
 DEBUG= -g -pg
 

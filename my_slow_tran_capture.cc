@@ -1,6 +1,6 @@
 /**
  *   MySlowTranCapture -- Capturing Slow MySQL Transactions
- *   Copyright (C) 2011 DeNA Co.,Ltd. 
+ *   Copyright (C) 2011 DeNA Co.,Ltd.
  *
  *   This program is free software; you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -375,7 +375,7 @@ void parse_query(uint64_t key, unsigned char *p, uint query_length,
 }
 
 
-void parse_quit(uint64_t key, struct timeval tv, struct in_addr raddr, 
+void parse_quit(uint64_t key, struct timeval tv, struct in_addr raddr,
                 uint16_t rport)
 {
   std::unordered_map<uint64_t, queries_t* >::iterator it;
@@ -417,13 +417,13 @@ void parse_command(uint64_t key, struct timeval tv, uint command)
     t->direction= INBOUND;
     t->next= NULL;
     queries_t* queries= it->second;
-    enqueue(queries, t); 
+    enqueue(queries, t);
     trans[key]= queries;
   }
 }
 
 
-int inbound(struct tcphdr *tcp, struct timeval tv, 
+int inbound(struct tcphdr *tcp, struct timeval tv,
              struct in_addr raddr, uint16_t rport,
              const unsigned char *packet, const int datalen)
 {
@@ -444,7 +444,7 @@ int inbound(struct tcphdr *tcp, struct timeval tv,
     if(command <= COM_END)
       parse_command(key, tv, command);
     break;
-  } 
+  }
   return 0;
 }
 
@@ -635,7 +635,7 @@ int main(int argc, char** argv)
     return -4;
   }
 
-  printf("Logging transactions that take more than %d milliseconds..\n", 
+  printf("Logging transactions that take more than %d milliseconds..\n",
     alert_millis);
 
   if(old_protocol)
