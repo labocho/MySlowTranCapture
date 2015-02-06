@@ -35,7 +35,7 @@
 #include <pcap.h>
 
 #include <boost/regex.hpp>
-#include <tr1/unordered_map>
+#include <unordered_map>
 
 #include "my_slow_tran_capture.h"
 
@@ -43,7 +43,7 @@
 #include "local_addresses.h"
 
 
-std::tr1::unordered_map<uint64_t, queries_t*> trans;
+std::unordered_map<uint64_t, queries_t*> trans;
 uint alert_millis= 4000;
 uint max_packets= 0;
 bool old_protocol= 0;
@@ -177,7 +177,7 @@ int delete_queue(queries_t* queue)
 
 void clear_trans()
 {
-  std::tr1::unordered_map<uint64_t, queries_t* >::iterator it= trans.begin();
+  std::unordered_map<uint64_t, queries_t* >::iterator it= trans.begin();
   while (it != trans.end())
   {
     queries_t* queue= it->second;
@@ -238,7 +238,7 @@ int outbound(struct tcphdr *tcp, struct timeval tv,
   p+= 4;
   int server_code= p[0];
 
-  std::tr1::unordered_map<uint64_t, queries_t* >::iterator it;
+  std::unordered_map<uint64_t, queries_t* >::iterator it;
   it= trans.find(key);
   if(it != trans.end())
   {
@@ -322,7 +322,7 @@ void parse_query(uint64_t key, unsigned char *p, uint query_length,
 
   if (is_begin_tran(query, query_length))
   {
-    std::tr1::unordered_map<uint64_t, queries_t* >::iterator it;
+    std::unordered_map<uint64_t, queries_t* >::iterator it;
     it= trans.find(key);
     if (it != trans.end())
     {
@@ -343,7 +343,7 @@ void parse_query(uint64_t key, unsigned char *p, uint query_length,
     trans[key]= t;
   }else if (is_end_tran(query, query_length))
   {
-    std::tr1::unordered_map<uint64_t, queries_t* >::iterator it;
+    std::unordered_map<uint64_t, queries_t* >::iterator it;
     it= trans.find(key);
     if (it != trans.end())
     {
@@ -358,7 +358,7 @@ void parse_query(uint64_t key, unsigned char *p, uint query_length,
     }
   }else
   {
-    std::tr1::unordered_map<uint64_t, queries_t* >::iterator it;
+    std::unordered_map<uint64_t, queries_t* >::iterator it;
     it= trans.find(key);
     if (it != trans.end())
     {
@@ -378,7 +378,7 @@ void parse_query(uint64_t key, unsigned char *p, uint query_length,
 void parse_quit(uint64_t key, struct timeval tv, struct in_addr raddr, 
                 uint16_t rport)
 {
-  std::tr1::unordered_map<uint64_t, queries_t* >::iterator it;
+  std::unordered_map<uint64_t, queries_t* >::iterator it;
   it= trans.find(key);
   if (it != trans.end())
   {
@@ -401,7 +401,7 @@ void parse_quit(uint64_t key, struct timeval tv, struct in_addr raddr,
 
 void parse_command(uint64_t key, struct timeval tv, uint command)
 {
-  std::tr1::unordered_map<uint64_t, queries_t* >::iterator it;
+  std::unordered_map<uint64_t, queries_t* >::iterator it;
   it= trans.find(key);
   if (it != trans.end())
   {
@@ -470,13 +470,13 @@ int process_ip(pcap_t *dev, const struct ip *ip, struct timeval tv,
     unsigned datalen;
 
   case IPPROTO_TCP:
-    tcp= (struct tcphdr *) ((unsigned char *) ip + sizeof(iphdr));
+    tcp= (struct tcphdr *) ((unsigned char *) ip + sizeof(struct ip));
 
-    sport= ntohs(tcp->source);
-    dport= ntohs(tcp->dest);
-    datalen= len - sizeof(iphdr) - tcp->doff * 4;
+    sport= ntohs(tcp->th_sport);
+    dport= ntohs(tcp->th_dport);
+    datalen= len - sizeof(struct ip) - tcp->th_off * 4;
 
-    if (tcp->fin == 1)
+    if (tcp->th_flags & TH_FIN)
     {
       if (incoming)
         parse_quit(make_key(ip->ip_src, sport), tv, ip->ip_src, sport);
